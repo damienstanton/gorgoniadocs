@@ -1,0 +1,679 @@
+<!doctype html>
+<html>
+<head>
+	<meta name="generator" content="Hugo 0.20.7" />
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Gorgonia: Machine Learning in Go</title>
+    <link href='/slate/stylesheets/monokai.css' rel="stylesheet" media="screen" />
+<link href='/slate/stylesheets/screen.css' rel="stylesheet" media="screen" />
+<link href='/slate/stylesheets/print.css' rel="stylesheet" media="print" />
+
+    
+<script src='/slate/javascripts/all.js'></script>
+
+    
+</head>
+<body class="index" data-languages="[ &#34;go&#34; ]">
+    <a href="#" id="nav-button">
+        <span>
+        NAV
+        <img src='/slate/images/navbar.png'/>
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+        <img src='/images/logo.png' />
+        
+        <div class="lang-selector">
+            
+            <a href="#" data-language-name="go">Go Example</a>
+            
+        </div>
+         
+        
+        <div class="search">
+            <input type="text" class="search" id="input-search" placeholder='Search'>
+        </div>
+        <ul class="search-results"></ul>
+        
+        <div id="toc">
+        </div>
+         
+        
+        <ul class="toc-footer">
+            
+            <li><a href="https://github.com/chewxy/gorgonia" target="_blank">Gorgonia on GitHub</a></li>
+            
+        </ul>
+        
+    </div>
+    <div class="page-wrapper">
+        <div class="dark-box"></div>
+        <div class="content">
+            
+    
+        
+
+<h1 id="gorgonia-godoc-https-godoc-org-github-com-chewxy-gorgonia-status-svg-https-godoc-org-github-com-chewxy-gorgonia-build-status-https-travis-ci-org-chewxy-gorgonia-svg-branch-master-https-travis-ci-org-chewxy-gorgonia-coverage-status-https-coveralls-io-repos-github-chewxy-gorgonia-badge-svg-branch-master-https-coveralls-io-github-chewxy-gorgonia-branch-master-go-report-card-https-goreportcard-com-badge-github-com-chewxy-gorgonia-https-goreportcard-com-report-github-com-chewxy-gorgonia">Gorgonia <a href="https://godoc.org/github.com/chewxy/gorgonia" target="_blank"><img src="https://godoc.org/github.com/chewxy/gorgonia?status.svg" alt="GoDoc" /></a> <a href="https://travis-ci.org/chewxy/gorgonia" target="_blank"><img src="https://travis-ci.org/chewxy/gorgonia.svg?branch=master" alt="Build Status" /></a> <a href="https://coveralls.io/github/chewxy/gorgonia?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/chewxy/gorgonia/badge.svg?branch=master" alt="Coverage Status" /></a> <a href="https://goreportcard.com/report/github.com/chewxy/gorgonia" target="_blank"><img src="https://goreportcard.com/badge/github.com/chewxy/gorgonia" alt="Go Report Card" /></a></h1>
+
+<p>Gorgonia is a library that helps facilitate machine learning in Go. Write and evaluate mathematical equations involving multidimensional arrays easily. If this sounds like <a href="http://deeplearning.net/software/theano/" target="_blank">Theano</a> or <a href="https://www.tensorflow.org/" target="_blank">TensorFlow</a>, it&rsquo;s because the idea is quite similar. Specifically, the library is pretty low-level, like Theano, but has higher goals like Tensorflow.</p>
+
+<p>Gorgonia:</p>
+
+<ul>
+<li>Can perform automatic differentiation</li>
+<li>Can perform symbolic differentiation</li>
+<li>Can perform gradient descent optimizations</li>
+<li>Can perform numerical stabilization</li>
+<li>Provides a number of convenience functions to help create neural networks</li>
+<li>Is fairly quick (comparable to Theano and Tensorflow&rsquo;s speed)</li>
+<li>Supports CUDA/GPGPU computation (OpenCL not yet supported, send a pull request)</li>
+<li>Will support distributed computing</li>
+</ul>
+
+<h1 id="why-use-gorgonia">Why Use Gorgonia?</h1>
+
+<p>The main reason to use Gorgonia is developer comfort. If you&rsquo;re using a Go stack extensively, now you have access to the ability to create production-ready machine learning systems in an environment that you are already familiar and comfortable with.</p>
+
+<p>ML/AI at large is usually split into two stages: the experimental stage where one builds various models, test and retest; and the deployed state where a model after being tested and played with, is deployed. This necessitate different roles like data scientist and data engineer.</p>
+
+<p>Typically the two phases have different tools: Python/Lua (using <a href="http://deeplearning.net/software/theano/" target="_blank">Theano</a>, <a href="http://torch.ch/" target="_blank">Torch</a>, etc) is commonly used for the experimental stage, and then the model is rewritten in some more performant language like C++ (using <a href="http://dlib.net/ml.html" target="_blank">dlib</a>, <a href="http://mlpack.org" target="_blank">mlpack</a> etc). Of course, nowadays the gap is closing and people frequently share the tools between them. Tensorflow is one such tool that bridges the gap.</p>
+
+<p>Gorgonia aims to do the same, but for the Go environment. Gorgonia is currently fairly performant - its speeds are comparable to Theano&rsquo;s and Tensorflow&rsquo;s (official benchmarks haven&rsquo;t yet been done because of an existing CUDA bug in Gorgonia; and also the implementations may differ slightly so an exact like-for-like model is hard to compare).</p>
+
+<h1 id="installation">Installation</h1>
+
+<p>The package is go-gettable: <code>go get -u github.com/chewxy/gorgonia</code>.</p>
+
+<p>There are very few dependencies that Gorgonia uses - and they&rsquo;re all pretty stable, so as of now there isn&rsquo;t a need for vendoring tools. These are the list of external packages that Gorgonia calls, ranked in order of reliance that this package has (subpackages are omitted):</p>
+
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Used For</th>
+<th>Vitality</th>
+<th>Notes</th>
+<th>Licence</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><a href="http://github.com/gonum/graph" target="_blank">gonum/graph</a></td>
+<td>Sorting <code>*ExprGraph</code></td>
+<td>Vital. Removal means Gorgonia will not work</td>
+<td>Development of Gorgonia is committed to keeping up with the most updated version</td>
+<td><a href="https://github.com/gonum/license" target="_blank">gonum license</a> (MIT/BSD-like)</td>
+</tr>
+
+<tr>
+<td><a href="http://github.com/gonum/blas" target="_blank">gonum/blas</a></td>
+<td>Tensor subpackage linear algebra operations</td>
+<td>Vital. Removal means Gorgonial will not work</td>
+<td>Development of Gorgonia is committed to keeping up with the most updated version</td>
+<td><a href="https://github.com/gonum/license" target="_blank">gonum license</a> (MIT/BSD-like)</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/chewxy/cu" target="_blank">cu</a></td>
+<td>CUDA drivers</td>
+<td>Needed for CUDA operations</td>
+<td>Same maintainer as Gorgonia</td>
+<td>MIT/BSD-like</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/chewxy/math32" target="_blank">math32</a></td>
+<td><code>float32</code> operations</td>
+<td>Can be replaced by <code>float32(math.XXX(float64(x)))</code></td>
+<td>Same maintainer as Gorgonia, same API as the built in <code>math</code> package</td>
+<td>MIT/BSD-like</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/chewxy/hm" target="_blank">hm</a></td>
+<td>Type system for Gorgonia</td>
+<td>Gorgonia&rsquo;s graphs are pretty tightly coupled with the type system</td>
+<td>Same maintainer as Gorgonia</td>
+<td>MIT/BSD-like</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/chewxy/vecf64" target="_blank">vecf64</a></td>
+<td>optimized <code>[]float64</code> operations</td>
+<td>Can be generated in the <code>tensor/genlib</code> package. However, plenty of optimizations have been made/will be made</td>
+<td>Same maintainer as Gorgonia</td>
+<td>MIT/BSD-like</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/chewxy/vecf32" target="_blank">vecf32</a></td>
+<td>optimized <code>[]float32</code> operations</td>
+<td>Can be generated in the <code>tensor/genlib</code> package. However, plenty of optimizations have been made/will be made</td>
+<td>Same maintainer as Gorgonia</td>
+<td>MIT/BSD-like</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/xtgo/set" target="_blank">set</a></td>
+<td>Various set operations</td>
+<td>Can be easily replaced</td>
+<td>Stable API for the past 1 year</td>
+<td><a href="https://github.com/xtgo/set/blob/master/LICENSE" target="_blank">set licence</a> (MIT/BSD-like)</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/awalterschulze/gographviz" target="_blank">gographviz</a></td>
+<td>Used for printing graphs</td>
+<td>Graph printing is only vital to debugging. Gorgonia can survive without, but with a major (but arguably nonvital) feature loss</td>
+<td>Last update 12th April 2017</td>
+<td><a href="https://github.com/awalterschulze/gographviz/blob/master/LICENSE" target="_blank">gographviz licence</a> (Apache 2.0)</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/leesper/go_rng" target="_blank">rng</a></td>
+<td>Used to implement helper functions to generate initial weights</td>
+<td>Can be replaced fairly easily. Gorgonia can do without the convenience functions too</td>
+<td></td>
+<td><a href="https://github.com/leesper/go_rng/blob/master/LICENSE" target="_blank">rng licence</a> (Apache 2.0)</td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/pkg/errors" target="_blank">errors</a></td>
+<td>Error wrapping</td>
+<td>Gorgonia won&rsquo;t die without it. In fact Gorgonia has also used <a href="https://github.com/go-errors/errors" target="_blank">goerrors/errors</a> in the past.</td>
+<td>Stable API for the past 6 months</td>
+<td><a href="https://github.com/pkg/errors/blob/master/LICENSE" target="_blank">errors licence</a> (MIT/BSD-like)</td>
+</tr>
+
+<tr>
+<td><a href="http://github.com/gonum/matrix" target="_blank">gonum/matrix</a></td>
+<td>Compatibility between <code>Tensor</code> and Gonum&rsquo;s Matrix</td>
+<td>Development of Gorgonia is committed to keeping up with the most updated version</td>
+<td><a href="https://github.com/gonum/license" target="_blank">gonum license</a> (MIT/BSD-like)</td>
+<td></td>
+</tr>
+
+<tr>
+<td><a href="https://github.com/stretchr/testify" target="_blank">testify/assert</a></td>
+<td>Testing</td>
+<td>Can do without but will be a massive pain in the ass to test</td>
+<td></td>
+<td><a href="https://github.com/stretchr/testify/blob/master/LICENSE" target="_blank">testify licence</a> (MIT/BSD-like)</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="keeping-updated">Keeping Updated</h1>
+
+<p>Gorgonia&rsquo;s project has a <a href="https://groups.google.com/forum/#!forum/gorgonia" target="_blank">mailing list</a>, as well as a <a href="https://twitter.com/gorgoniaML" target="_blank">Twitter account</a>. Official updates and announcements will be posted to those two sites.</p>
+
+<h1 id="usage">Usage</h1>
+
+<p>Gorgonia works by creating a computation graph, and then executing it. Think of it as a programming language, but is limited to mathematical functions. In fact this is the dominant paradigm that the user should be used to thinking about. The computation graph is an <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank">AST</a>.</p>
+
+<p>Microsoft&rsquo;s <a href="https://github.com/Microsoft/CNTK" target="_blank">CNTK</a>, with its BrainScript, is perhaps the best at exemplifying the idea that building of a computation graph and running of the computation graphs are different things, and that the user should be in different modes of thoughts when going about them.</p>
+
+<p>Whilst Gorgonia&rsquo;s implementation doesn&rsquo;t enforce the separation of thought as far as CNTK&rsquo;s BrainScript does, the syntax does help a little bit.</p>
+
+<p>Here&rsquo;s an example - say you want to define a math expression <code>z = x + y</code>. Here&rsquo;s how you&rsquo;d do it:</p>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&quot;fmt&quot;</span>
+	<span class="s">&quot;log&quot;</span>
+
+	<span class="p">.</span> <span class="s">&quot;github.com/chewxy/gorgonia&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">g</span> <span class="o">:=</span> <span class="nx">NewGraph</span><span class="p">()</span>
+
+	<span class="kd">var</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span> <span class="o">*</span><span class="nx">Node</span>
+	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
+
+	<span class="c1">// define the expression</span>
+	<span class="nx">x</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">))</span>
+	<span class="nx">y</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">))</span>
+	<span class="nx">z</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">Add</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// create a VM to run the program on</span>
+	<span class="nx">machine</span> <span class="o">:=</span> <span class="nx">NewTapeMachine</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span>
+
+	<span class="c1">// set initial values then run</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">y</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">machine</span><span class="p">.</span><span class="nx">RunAll</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%v&quot;</span><span class="p">,</span> <span class="nx">z</span><span class="p">.</span><span class="nx">Value</span><span class="p">())</span>
+	<span class="c1">// Output: 4.5</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>You might note that it&rsquo;s a little more verbose than other packages of similar nature. For example, instead of compiling to a callable function, Gorgonia specifically compiles into a <code>*program</code> which requires a <code>*TapeMachine</code> to run. It also requires manual a <code>Let(...)</code> call.</p>
+
+<p>The author would like to contend that this is a Good Thing - to shift one&rsquo;s thinking to a machine-based thinking. It helps a lot in figuring out where things might go wrong.</p>
+
+<h3 id="vms">VMs</h3>
+
+<p>There are two VMs in the current version of Gorgonia:</p>
+
+<ul>
+<li><code>TapeMachine</code></li>
+<li><code>LispMachine</code></li>
+</ul>
+
+<p>They function differently and take different inputs. The <code>TapeMachine</code> is useful for executing expressions that are generally static (that is to say the computation graph does not change). Due to its static nature, the <code>TapeMachine</code> is good for running expressions that are compiled-once-run-many-times (such as linear regression, SVM and the like).</p>
+
+<p>The <code>LispMachine</code> on the other hand was designed to take a graph as an input, and executes directly on the nodes of the graph. If the graph change, simply create a new lightweight <code>LispMachine</code> to execute it on. The <code>LispMachine</code> is suitable for tasks such as creating recurrent neural networks without a fixed size.</p>
+
+<p>Prior to release of Gorgonia, there was a third VM - a stack based VM that is similar to <code>TapeMachine</code> but deals with artificial gradients better. It may see light of day again, once this author has managed to fix all the kinks.</p>
+
+<h2 id="differentiation">Differentiation</h2>
+
+<p>Gorgonia performs both symbolic and automatic differentiation. There are subtle differences between the two processes. The author has found that it&rsquo;s best to think of it this way - Automatic differentiation is differentiation that happens at runtime, concurrently with the execution of the graph, while symbolic differentiation is differentiation that happens during the compilation phase.</p>
+
+<p>Runtime of course, refers to the execution of the expression graph, not the program&rsquo;s actual runtime.</p>
+
+<p>With the introduction to the two VMs, it&rsquo;s easy to see how Gorgonia can perform both symbolic and automatic differentiation. Using the same example as above, the reader should note that there was no differentiation done. Instead, let&rsquo;s try with a <code>LispMachine</code>:</p>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&quot;fmt&quot;</span>
+	<span class="s">&quot;log&quot;</span>
+
+	<span class="p">.</span> <span class="s">&quot;github.com/chewxy/gorgonia&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">g</span> <span class="o">:=</span> <span class="nx">NewGraph</span><span class="p">()</span>
+
+	<span class="kd">var</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span> <span class="o">*</span><span class="nx">Node</span>
+	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
+
+	<span class="c1">// define the expression</span>
+	<span class="nx">x</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">))</span>
+	<span class="nx">y</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">))</span>
+	<span class="nx">z</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">Add</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// set initial values then run</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">y</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+
+	<span class="c1">// by default, LispMachine performs forward mode and backwards mode execution</span>
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">NewLispMachine</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">m</span><span class="p">.</span><span class="nx">RunAll</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;z: %v\n&quot;</span><span class="p">,</span> <span class="nx">z</span><span class="p">.</span><span class="nx">Value</span><span class="p">())</span>
+
+	<span class="nx">xgrad</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">Grad</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;dz/dx: %v\n&quot;</span><span class="p">,</span> <span class="nx">xgrad</span><span class="p">)</span>
+
+	<span class="nx">ygrad</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">y</span><span class="p">.</span><span class="nx">Grad</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;dz/dy: %v\n&quot;</span><span class="p">,</span> <span class="nx">ygrad</span><span class="p">)</span>
+
+	<span class="c1">// Output:</span>
+	<span class="c1">// z: 4.5</span>
+	<span class="c1">// dz/dx: 1</span>
+	<span class="c1">// dz/dy: 1</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Of course, Gorgonia also supports the more traditional symbolic differentiation like in Theano:</p>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&quot;fmt&quot;</span>
+	<span class="s">&quot;log&quot;</span>
+
+	<span class="p">.</span> <span class="s">&quot;github.com/chewxy/gorgonia&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">g</span> <span class="o">:=</span> <span class="nx">NewGraph</span><span class="p">()</span>
+
+	<span class="kd">var</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span> <span class="o">*</span><span class="nx">Node</span>
+	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
+
+	<span class="c1">// define the expression</span>
+	<span class="nx">x</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">))</span>
+	<span class="nx">y</span> <span class="p">=</span> <span class="nx">NewScalar</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">Float64</span><span class="p">,</span> <span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">))</span>
+	<span class="nx">z</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">Add</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// symbolically differentiate z with regards to x and y</span>
+	<span class="c1">// this adds the gradient nodes to the graph g</span>
+	<span class="kd">var</span> <span class="nx">grads</span> <span class="nx">Nodes</span>
+	<span class="nx">grads</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">Grad</span><span class="p">(</span><span class="nx">z</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// create a VM to run the program on</span>
+	<span class="nx">machine</span> <span class="o">:=</span> <span class="nx">NewTapeMachine</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span>
+
+	<span class="c1">// set initial values then run</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+	<span class="nx">Let</span><span class="p">(</span><span class="nx">y</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">machine</span><span class="p">.</span><span class="nx">RunAll</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;z: %v\n&quot;</span><span class="p">,</span> <span class="nx">z</span><span class="p">.</span><span class="nx">Value</span><span class="p">())</span>
+
+	<span class="nx">xgrad</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">Grad</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;dz/dx: %v | %v\n&quot;</span><span class="p">,</span> <span class="nx">xgrad</span><span class="p">,</span> <span class="nx">grads</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+	<span class="nx">ygrad</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">y</span><span class="p">.</span><span class="nx">Grad</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;dz/dy: %v | %v\n&quot;</span><span class="p">,</span> <span class="nx">ygrad</span><span class="p">,</span> <span class="nx">grads</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+	<span class="c1">// Output:</span>
+	<span class="c1">// z: 4.5</span>
+	<span class="c1">// dz/dx: 1 | 1</span>
+	<span class="c1">// dz/dy: 1 | 1</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Currently Gorgonia only performs backwards mode automatic differentiation (aka backpropagation), although one may observe the vestiges of an older version which supported forwards mode differentiation in the existence of <code>*dualValue</code>. It may return in the future.</p>
+
+<h2 id="graph">Graph</h2>
+
+<p>A lot has been said about a computation graph or an expression graph. But what is it exactly? Think of it as an AST for the math expression that you want. Here&rsquo;s the graph for the examples (but with a vector and a scalar addition instead) above:</p>
+
+<p><img src="https://raw.githubusercontent.com/chewxy/gorgonia/master/media/exprGraph_example1.png" alt="graph1" /></p>
+
+<p>By the way, Gorgonia comes with nice-ish graph printing abilities. Here&rsquo;s an example of a graph of the equation <code>y = x²</code> and its derivation:</p>
+
+<p><img src="https://raw.githubusercontent.com/chewxy/gorgonia/master/media/exprGraph_example2.png" alt="graph1" /></p>
+
+<p>To read the graph is easy. The expression builds from bottom up, while the derivations build from top down. This way the derivative of each node is roughly on the same level.</p>
+
+<p>Red-outlined nodes indicate that it&rsquo;s a root node. Green outlined nodes indicate that they&rsquo;re a leaf node. Nodes with a yellow background indicate that it&rsquo;s an input node. The dotted arrows indicate which node is the gradient node for the pointed-to node.</p>
+
+<p>Concretely, it says that <code>c42011e840</code> (<code>dy/dx</code>) is the gradient node of the input <code>c42011e000</code> (which is <code>x</code>).</p>
+
+<h3 id="node-rendering">Node Rendering</h3>
+
+<p>A Node is rendered thusly:</p>
+
+<table>
+<tr><td>ID</td><td>node name :: type</td></tr>
+<tr><td>OP*</td><td>op name :: type</td></tr>
+<tr><td colspan="2">shape</td></tr>
+<tr><td colspan="2">compilation metadata</td></tr>
+<tr><td>Value†</td><td>Gradient</td></tr>
+</table>
+
+<h3 id="additional-notes">Additional Notes</h3>
+
+<ul>
+<li>If it&rsquo;s an input node, then the Op row will not show up.</li>
+<li>If there are no Values bound to the node, it will show up as NIL. However, when there are values and gradients, it will try to as best as possible display the values bound to the node.</li>
+</ul>
+
+<h2 id="using-cuda">Using CUDA</h2>
+
+<p>Gorgonia comes with CUDA support out of the box. However, usage is specialized. To use CUDA, you must build your application with the build tag <code>cuda</code>, like so:</p>
+
+<pre><code>go build -tags='cuda' .
+</code></pre>
+
+<p>Furthermore, there are some additional requirements:</p>
+
+<ol>
+<li><a href="https://developer.nvidia.com/cuda-toolkit" target="_blank">CUDA toolkit 8.0</a> is required. Installing this installs the <code>nvcc</code> compiler which is required to run your code with CUDA</li>
+<li><code>go install github.com/chewxy/gorgonia/cmd/cudagen</code>. This installs the <code>cudagen</code> program. Running <code>cudagen</code> will generate the relevant CUDA related code for Gorgonia.</li>
+<li>The CUDA ops must be manually enabled in your code with the <code>UseCudaFor</code> option.</li>
+<li><code>runtime.LockOSThread()</code> must be called in the main function where the VM is running. CUDA requires thread affinity, and therefore the OS thread must be locked.</li>
+</ol>
+
+<h3 id="example">Example</h3>
+
+<p>So how do we use CUDA? Say we&rsquo;ve got a file, <code>main.go</code>:</p>
+<div class="highlight"><pre><code class="language-go" data-lang="go"><span></span><span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&quot;fmt&quot;</span>
+	<span class="s">&quot;log&quot;</span>
+	<span class="s">&quot;runtime&quot;</span>
+
+	<span class="nx">T</span> <span class="s">&quot;github.com/chewxy/gorgonia&quot;</span>
+	<span class="s">&quot;github.com/chewxy/gorgonia/tensor&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">g</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">NewGraph</span><span class="p">()</span>
+	<span class="nx">x</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">NewMatrix</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">T</span><span class="p">.</span><span class="nx">Float32</span><span class="p">,</span> <span class="nx">T</span><span class="p">.</span><span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="nx">T</span><span class="p">.</span><span class="nx">WithShape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+	<span class="nx">y</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">NewMatrix</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">T</span><span class="p">.</span><span class="nx">Float32</span><span class="p">,</span> <span class="nx">T</span><span class="p">.</span><span class="nx">WithName</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">),</span> <span class="nx">T</span><span class="p">.</span><span class="nx">WithShape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+	<span class="nx">xpy</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">T</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">))</span>
+	<span class="nx">xpy2</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">T</span><span class="p">.</span><span class="nx">Tanh</span><span class="p">(</span><span class="nx">xpy</span><span class="p">))</span>
+
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">T</span><span class="p">.</span><span class="nx">NewTapeMachine</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span> <span class="nx">T</span><span class="p">.</span><span class="nx">UseCudaFor</span><span class="p">(</span><span class="s">&quot;tanh&quot;</span><span class="p">))</span>
+
+	<span class="nx">T</span><span class="p">.</span><span class="nx">Let</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">tensor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">WithShape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="nx">tensor</span><span class="p">.</span><span class="nx">WithBacking</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">Random</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">Float32</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="mi">100</span><span class="p">))))</span>
+	<span class="nx">T</span><span class="p">.</span><span class="nx">Let</span><span class="p">(</span><span class="nx">y</span><span class="p">,</span> <span class="nx">tensor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">WithShape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="nx">tensor</span><span class="p">.</span><span class="nx">WithBacking</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">Random</span><span class="p">(</span><span class="nx">tensor</span><span class="p">.</span><span class="nx">Float32</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="mi">100</span><span class="p">))))</span>
+
+	<span class="nx">runtime</span><span class="p">.</span><span class="nx">LockOSThread</span><span class="p">()</span>
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">RunAll</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="nx">log</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">&quot;iteration: %d. Err: %v&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="nx">runtime</span><span class="p">.</span><span class="nx">UnlockOSThread</span><span class="p">()</span>
+
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%1.1f&quot;</span><span class="p">,</span> <span class="nx">xpy2</span><span class="p">.</span><span class="nx">Value</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>If this is run normally:</p>
+
+<pre><code>go run main.go
+</code></pre>
+
+<p>CUDA will not be used.</p>
+
+<p>If the program is to be run using CUDA, then this must be invoked:</p>
+
+<pre><code>go run -tags='cuda'
+</code></pre>
+
+<p>And even so, only the <code>tanh</code> function uses CUDA.</p>
+
+<h3 id="rationale">Rationale</h3>
+
+<p>The main reasons for having such complicated requirements for using CUDA is quite simply performance related. As Dave Cheney famously wrote, <a href="https://dave.cheney.net/2016/01/18/cgo-is-not-go" target="_blank">cgo is not Go</a>. To use CUDA, cgo is unfortunately required. And to use cgo, plenty of tradeoffs need to be made.</p>
+
+<p>Therefore the solution was to nestle the CUDA related code in a build tag, <code>cuda</code>. That way by default no cgo is used (well, kind-of - you could still use <code>cblas</code> or <code>blase</code>).</p>
+
+<p>The reason for requiring <a href="https://developer.nvidia.com/cuda-toolkit" target="_blank">CUDA toolkit 8.0</a> is because there are many CUDA <a href="http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities" target="_blank">Compute Capabilities</a>, and generating code for them all would yield a huge binary for no real good reason. Rather, users are encouraged to compile for their specific Compute Capabilities.</p>
+
+<p>Lastly, the reason for requiring an explicit specification to use CUDA for which ops is due to the cost of cgo calls. Additional work is being done currently to implement batched cgo calls,  but until that is done, the solution is keyhole &ldquo;upgrade&rdquo; of certain ops</p>
+
+<h3 id="op-s-supported-by-cuda"><code>Op</code>s supported by CUDA</h3>
+
+<p>As of now, only the very basic simple ops support CUDA:</p>
+
+<p>Elementwise unary operations:</p>
+
+<ul>
+<li><code>abs</code></li>
+<li><code>sin</code></li>
+<li><code>cos</code></li>
+<li><code>exp</code></li>
+<li><code>ln</code></li>
+<li><code>log2</code></li>
+<li><code>neg</code></li>
+<li><code>square</code></li>
+<li><code>sqrt</code></li>
+<li><code>inv</code> (reciprocal of a number)</li>
+<li><code>cube</code></li>
+<li><code>tanh</code></li>
+<li><code>sigmoid</code></li>
+<li><code>log1p</code></li>
+<li><code>expm1</code></li>
+<li><code>softplus</code></li>
+</ul>
+
+<p>Elementwise binary operations - only arithmetic operations support CUDA:</p>
+
+<ul>
+<li><code>add</code></li>
+<li><code>sub</code></li>
+<li><code>mul</code></li>
+<li><code>div</code></li>
+<li><code>pow</code></li>
+</ul>
+
+<p>From a lot of profiling of this author&rsquo;s personal projects, the ones that really matter are <code>tanh</code>, <code>sigmoid</code>, <code>expm1</code>, <code>exp</code> and <code>cube</code> - basically the activation functions. The other operations do work fine with MKL+AVX and aren&rsquo;t the major cause of slowness in a neural network</p>
+
+<h3 id="cuda-improvements">CUDA improvements</h3>
+
+<p>In a trivial benchmark, careful use of CUDA (in this case, used to call <code>sigmoid</code>) shows impressive improvements over non-CUDA code (bearing in mind the CUDA kernel is extremely naive and not optimized):</p>
+
+<pre><code>BenchmarkOneMilCUDA-8   	     300	   3348711 ns/op
+BenchmarkOneMil-8       	      50	  33169036 ns/op
+</code></pre>
+
+<h1 id="api-stability">API Stability</h1>
+
+<p>Gorgonia&rsquo;s API is as of right now, not considered stable. It will be stable from version 1.0 forwards.</p>
+
+<p>1.0 is defined by when the test coverage hits 90%, and the relevant <code>Tensor</code> methods have been completed.</p>
+
+<h1 id="roadmap">Roadmap</h1>
+
+<p>Here are the goals for Gorgonia, sorted by importance</p>
+
+<ul class="task-list">
+<li><input type="checkbox" disabled class="task-list-item"> 80+% test coverage. Current coverage is 50% for Gorgonia and 80% for the <code>tensor</code>.</li>
+<li><input type="checkbox" disabled class="task-list-item"> More advanced operations (like <code>einsum</code>). The current Tensor operators are pretty primitive.</li>
+<li><input type="checkbox" checked disabled class="task-list-item"> TravisCI for this package.</li>
+<li><input type="checkbox" checked disabled class="task-list-item"> Coveralls for this package.</li>
+<li><input type="checkbox" disabled class="task-list-item"> Clean out the tests. The tests were the results of many years of accumulation. It&rsquo;d be nice to refactor them out nicely. Use table driven tests where possible.</li>
+<li><input type="checkbox" checked disabled class="task-list-item"> Improve performance especially re: allocation, minimize impact of type system.</li>
+<li><input type="checkbox" checked disabled class="task-list-item"> Improve Op extensibility by exposing/changing the Op interface to be all exported, and not a mix of exported and unexported methods (Alternatively, create a <code>Compose</code> Op type for extensibility). This way everyone can make their own custom <code>Op</code>s.</li>
+<li><input type="checkbox" disabled class="task-list-item"> Refactor the CuBLAS package as well as the Blase package to follow in vein of the CUDA implementation.</li>
+<li><input type="checkbox" disabled class="task-list-item"> Distributed computing. The ability to spread jobs out across multiple machines and communicating with each other has been attempted at least 3 times, but failed each time.</li>
+<li><input type="checkbox" disabled class="task-list-item"> Better documentation on why certain decisions were made, and the design of Gorgonia in general.</li>
+<li><input type="checkbox" disabled class="task-list-item"> Higher order derivative optimization algorithms (LBFGS comes to mind)</li>
+<li><input type="checkbox" disabled class="task-list-item"> Derivative-free optimization algorithms</li>
+</ul>
+
+<h1 id="goals">Goals</h1>
+
+<p>The primary goal for Gorgonia is to be a <em>highly performant</em> machine learning/graph computation-based library that can scale across multiple machines. It should bring the appeal of Go (simple compilation and deployment process) to the ML world. It&rsquo;s a long way from there currently, however, the baby steps are already there.</p>
+
+<p>The secondary goal for Gorgonia is to provide a platform for exploration for non-standard deep-learning and neural network related things. This includes things like neo-hebbian learning, corner-cutting algorithms, evolutionary algorithms and the like.</p>
+
+<h1 id="contributing">Contributing</h1>
+
+<p>Obviously since you are most probably reading this on Github, Github will form the major part of the workflow for contributing to this package.</p>
+
+<p>See also: CONTRIBUTING.md</p>
+
+<h2 id="contributors-and-significant-contributors">Contributors and Significant Contributors</h2>
+
+<p>All contributions are welcome. However, there is a new class of contributor, called Significant Contributors.</p>
+
+<p>A Significant Contributor is one who has shown <em>deep understanding</em> of how the library works and/or its environs.  Here are examples of what constitutes a Significant Contribution:</p>
+
+<ul>
+<li>Wrote significant amounts of documentation pertaining to <strong>why</strong>/the mechanics of particular functions/methods and how the different parts affect one another</li>
+<li>Wrote code, and tests around the more intricately connected parts of Gorgonia</li>
+<li>Wrote code and tests, and have at least 5 pull requests accepted</li>
+<li>Provided expert analysis on parts of the package (for example, you may be a floating point operations expert who optimized one function)</li>
+<li>Answered at least 10 support questions.</li>
+</ul>
+
+<p>Significant Contributors list will be updated once a month (if anyone even uses Gorgonia that is).</p>
+
+<h1 id="how-to-get-support">How To Get Support</h1>
+
+<p>The best way of support right now is to open a ticket on Github.</p>
+
+<h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+
+<h3 id="why-are-there-seemingly-random-runtime-gc-calls-in-the-tests">Why are there seemingly random <code>runtime.GC()</code> calls in the tests?</h3>
+
+<p>The answer to this is simple - the design of the package uses CUDA in a particular way: specifically, a CUDA device and context is tied to a <code>VM</code>, instead of at the package level. This means for every <code>VM</code> created, a different CUDA context is created per device per <code>VM</code>. This way all the operations will play nicely with other applications that may be using CUDA (this needs to be stress-tested, however).</p>
+
+<p>The CUDA contexts are only destroyed when the <code>VM</code> gets garbage collected (with the help of a finalizer function). In the tests, about 100 <code>VM</code>s get created, and garbage collection for the most part can be considered random. This leads to cases where the GPU runs out of memory as there are too many contexts being used.</p>
+
+<p>Therefore at the end of any tests that may use GPU, a <code>runtime.GC()</code> call is made to force garbage collection, freeing GPU memories.</p>
+
+<p>In production, one is unlikely to start that many <code>VM</code>s, therefore it&rsquo;s not really a problem. If there is, open a ticket on Github, and we&rsquo;ll look into adding a <code>Finish()</code> method for the <code>VM</code>s.</p>
+
+<h1 id="licence">Licence</h1>
+
+<p>Gorgonia is licenced under a variant of Apache 2.0. It&rsquo;s for all intents and purposes the same as the Apache 2.0 Licence, with the exception of not being able to commercially profit directly from the package unless you&rsquo;re a Significant Contributor (for example, providing commercial support for the package). It&rsquo;s perfectly fine to profit directly from a derivative of Gorgonia (for example, if you use Gorgonia as a library in your product)</p>
+
+<p>Everyone is still allowed to use Gorgonia for commercial purposes (example: using it in a software for your business).</p>
+
+<h2 id="various-other-copyright-notices">Various Other Copyright Notices</h2>
+
+<p>These are the packages and libraries which inspired and were adapted from in the process of writing Gorgonia (the Go packages that were used were already declared above):</p>
+
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>How it&rsquo;s Used</th>
+<th>Licence</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Numpy</td>
+<td>Inspired large portions. Directly adapted algorithms for a few methods (explicitly labelled in the docs)</td>
+<td>MIT/BSD-like. <a href="https://github.com/numpy/numpy/blob/master/LICENSE.txt" target="_blank">Numpy Licence</a></td>
+</tr>
+
+<tr>
+<td>Theano</td>
+<td>Inspired large portions. (Unsure: number of directly adapted algorithms)</td>
+<td>MIT/BSD-like <a href="http://deeplearning.net/software/theano/LICENSE.html" target="_blank">Theano&rsquo;s licence</a></td>
+</tr>
+</tbody>
+</table>
+
+    
+
+        </div>
+        <div class="dark-box">
+            
+            <div class="lang-selector">
+                
+                <a href="#" data-language-name="go">Go Example</a>
+                
+            </div>
+            
+        </div>
+    </div>
+    
+</body>
+</html>

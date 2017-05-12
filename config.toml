@@ -1,0 +1,40 @@
+theme = "docuapi"
+themesdir = "themes"
+languageCode = "en-us"
+baseurl = "https://gorgoniadocs.damien.codes"
+title = "Gorgonia"
+
+# Code higlighting settings
+pygmentsCodefences = true
+pygmentsCodeFencesGuesSsyntax = false
+pygmentsOptions = ""
+pygmentsStyle = "monokai"
+# The monokai stylesheet is included in the base template.
+pygmentsUseClasses = true
+
+defaultContentLanguage = "en"
+
+[params]
+search = true
+  
+# Configure the language example tabs.
+[[params.language_tabs]]
+key = "go"
+name = "Go Example" 
+
+#Languages 
+[languages]
+
+[languages.en]
+languageName = "English"
+weight = 2
+title = "Gorgonia: Machine Learning in Go"
+
+# Left sidebar footer items. Use HTMl or Markdown.
+toc_footers = [
+    "[Gorgonia on GitHub](https://github.com/chewxy/gorgonia)",
+]
+
+[languages.en.blackfriday]
+angledQuotes = false
+hrefTargetBlank = true
