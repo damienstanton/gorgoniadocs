@@ -2,21 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://gorgoniadocs.damien.codes/</loc>
+    <loc>https://damien.codes/gorgonia/</loc>
   </url>
   
   <url>
-    <loc>https://gorgoniadocs.damien.codes/categories/</loc>
+    <loc>https://damien.codes/gorgonia/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://gorgoniadocs.damien.codes/</loc>
+    <loc>https://damien.codes/gorgonia/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://gorgoniadocs.damien.codes/tags/</loc>
+    <loc>https://damien.codes/gorgonia/tags/</loc>
     <priority>0</priority>
   </url>
   

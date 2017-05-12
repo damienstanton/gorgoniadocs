@@ -1,7 +1,7 @@
 theme = "docuapi"
 themesdir = "themes"
 languageCode = "en-us"
-baseurl = "https://gorgoniadocs.damien.codes"
+baseurl = "https://damien.codes/gorgonia/"
 title = "Gorgonia"
 
 # Code higlighting settings
